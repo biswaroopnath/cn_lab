@@ -1,60 +1,35 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <errno.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#define SERVERPORT 4952 // the port users will be connecting to
-int main()
-{
-    int sockfd;
-    struct sockaddr_in their_addr; // connector's address information
-    // struct hostent *he;
-    int numbytes;
-char arg[30];
-    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
-    {
-        perror("socket");
-        exit(1);
-    }
-    their_addr.sin_family = AF_INET;                     // host byte order
-    their_addr.sin_port = htons(SERVERPORT);             // short, network byte order
-    their_addr.sin_addr.s_addr = inet_addr("127.0.0.1"); // Insert UDP Server IP Address
-    // memset(their_addr.sin_zero, '\0', sizeof their_addr.sin_zero);
-    printf("Enter the number 1 and num 2  : ");
-    scanf("%s", arg);
-    if ((numbytes = sendto(sockfd, arg, sizeof(arg), 0, (struct sockaddr *)&their_addr, sizeof their_addr)) == -1)
-    {
-        perror("sendto");
-        exit(1);
-    }
+#include<stdio.h>
+#include<sys/types.h>
+#include<sys/socket.h>
+#include<netinet/in.h>
+#include<arpa/inet.h>
+#include<fcntl.h>
+#include<string.h>
 
-    printf("\n The Result Is As Follows: %s\n", arg);
-    close(sockfd);
-return 0;
-}char arg[30];
-    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
-    {
-        perror("socket");
-        exit(1);
-    }
-    their_addr.sin_family = AF_INET;                     // host byte order
-    their_addr.sin_port = htons(SERVERPORT);             // short, network byte order
-    their_addr.sin_addr.s_addr = inet_addr("127.0.0.1"); // Insert UDP Server IP Address
-    // memset(their_addr.sin_zero, '\0', sizeof their_addr.sin_zero);
-    printf("Enter the number 1 and num 2  : ");
-    scanf("%s", arg);
-    if ((numbytes = sendto(sockfd, arg, sizeof(arg), 0, (struct sockaddr *)&their_addr, sizeof their_addr)) == -1)
-    {
-        perror("sendto");
-        exit(1);
-    }
+int main() {
+	int socket_desc, client_sock1, length, i, flag=0;
+    struct sockaddr_in server, client;
 
-    printf("\n The Result Is As Follows: %s\n", arg);
-    close(sockfd);
-return 0;
+    socket_desc = socket(AF_INET,SOCK_STREAM,0);
+	server.sin_family=AF_INET;
+	server.sin_addr.s_addr=INADDR_ANY;
+	server.sin_port=60018;
+
+	i = bind(socket_desc, (struct sockaddr *)&server, sizeof(server));
+	printf("test %d %d\n",socket_desc, i);
+	listen(socket_desc, 2);
+	length = sizeof(socket_desc);
+	
+	client_sock1 = accept(socket_desc, (struct sockaddr *) &client, &length);
+
+	int n1, n2, ans;
+	recv(client_sock1, &n1, sizeof(n1), 0);
+	recv(client_sock1, &n2, sizeof(n2), 0);
+	printf("Client number 1: %d\n", n1);
+	printf("Client number 2: %d\n", n2);
+	ans = n1 * n2;
+	send(client_sock1, &ans, sizeof(ans), 0);
+
+	close(client_sock1);
+	return 0;
 }

@@ -1,48 +1,31 @@
-// Write a udp program, a client can send 2 integer numbers
-// and at server side it will add 2 numbers and display at server side
+#include<stdio.h>
+#include<sys/types.h>
+#include<sys/socket.h>
+#include<netinet/in.h>
+#include<arpa/inet.h>
+#include<fcntl.h>
+#include<string.h>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <errno.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#define MYPORT 4952 // the port users will be connecting to
-#define MAXBUFLEN 200
-int main()
-{
-    int sockfd;
-    struct sockaddr_in my_addr;    // my address information
-    struct sockaddr_in their_addr; // connector's address information
-    socklen_t addr_len;
-    int numbytes;
-    char buf[MAXBUFLEN];
-    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
-    {
-        perror("socket");
-        exit(1);
-    }
-    my_addr.sin_family = AF_INET;         // host byte order
-    my_addr.sin_port = htons(MYPORT);     // short, network byte order
-    my_addr.sin_addr.s_addr = INADDR_ANY; // automatically fill with my IP
-    if (bind(sockfd, (struct sockaddr *)&my_addr, sizeof my_addr) == -1)
-    {
-        perror("bind");
-        exit(1);
-    }
-    addr_len = sizeof their_addr;
-    if ((numbytes = recvfrom(sockfd, buf, MAXBUFLEN - 1, 0, (struct sockaddr *)&their_addr, &addr_len)) == -1)
-{
-        perror("recvfrom");
-        exit(1);
-    }
-    // get int from buf and add then and display result
-    int num1 = atoi(buf);
-    int num2 = atoi(buf + sizeof(int));
-    printf("\n The Result Is As Follows: %d\n", num1 + num2);
-    close(sockfd);
-return 0;
+int main() {
+	int i, sock, flag=0;
+	struct sockaddr_in server;
+
+	sock = socket(AF_INET,SOCK_STREAM,0);
+	server.sin_family = AF_INET;
+	server.sin_addr.s_addr = inet_addr("127.0.0.1");
+	server.sin_port = 60018;
+
+	connect(sock, (struct sockaddr *)&server, sizeof(server));
+
+	int n1, n2, ans;
+	printf("Number 1: ");
+	scanf("%d", &n1);
+	printf("Number 2: ");
+	scanf("%d", &n2);
+	send(sock, &n1, sizeof(n1), 0);
+	send(sock, &n2, sizeof(n2), 0);
+	recv(sock, &ans, sizeof(ans), 0);
+	printf("Server sent: %d\n", ans);
+
+	return 0;
 }
